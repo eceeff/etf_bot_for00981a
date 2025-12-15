@@ -1,0 +1,40 @@
+name: Daily 00981A Tracker
+
+on:
+  schedule:
+    # 設定在台灣時間早上 8:00 (UTC 00:00) 執行，確保基金公司已更新昨日數據
+    - cron: '0 0 * * 1-5' # 週一到週五
+  workflow_dispatch: # 允許手動觸發測試
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 關鍵：為了能比對昨日數據，我們需要快取 CSV 檔
+      # 也可以改用 git commit push 的方式把 csv 存回 repo (較簡單)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install requests pandas python-telegram-bot lxml html5lib
+
+      - name: Run Tracker
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+        run: python monitor_00981a.py
+
+      # 將更新後的 csv 存回 GitHub (作為簡易資料庫)
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add 00981a_holdings.csv || true
+          git commit -m "Update holdings data" || true
+          git push
