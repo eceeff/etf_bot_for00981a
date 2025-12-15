@@ -2,9 +2,11 @@ name: Daily 00981A Tracker
 
 on:
   schedule:
-    # 設定在台灣時間早上 8:00 (UTC 00:00) 執行，確保基金公司已更新昨日數據
-    - cron: '0 0 * * 1-5' # 週一到週五
-  workflow_dispatch: # 允許手動觸發測試
+    - cron: '0 12 * * 1-5' # 台灣時間晚上 8 點 (UTC 12:00)
+  workflow_dispatch:
+
+permissions:
+  contents: write  # <--- 重要：給予機器人寫入權限
 
 jobs:
   build:
@@ -13,8 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 關鍵：為了能比對昨日數據，我們需要快取 CSV 檔
-      # 也可以改用 git commit push 的方式把 csv 存回 repo (較簡單)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -29,13 +29,14 @@ jobs:
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
-        run: python monitor_00981a.py
+        run: python monitor_00981a_v3.py
 
-      # 將更新後的 csv 存回 GitHub (作為簡易資料庫)
-      - name: Commit and push changes
+      # ▼▼▼ 新增這一段 ▼▼▼
+      - name: Commit and push CSV
         run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add 00981a_holdings.csv || true
-          git commit -m "Update holdings data" || true
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add 00981a_holdings.csv
+          # 如果檔案沒變動，commit 會失敗，加上 || exit 0 讓它不要報錯
+          git commit -m "Auto-update: Daily holdings data" || exit 0
           git push
