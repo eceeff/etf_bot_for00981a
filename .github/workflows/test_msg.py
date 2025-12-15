@@ -1,8 +1,7 @@
 import requests
 
 # 請填入您的資訊
-TOKEN = "8561176671:AAFdZRHJ1PG7cYzE8g1LRAiKn6YZOjkwkG0"
-CHAT_ID = "977857400"
+
 
 def test_telegram():
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
