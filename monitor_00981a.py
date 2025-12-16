@@ -179,7 +179,10 @@ def compare_and_report():
         print(final_msg)
         send_telegram_message(final_msg)
     else:
-        print("今日股數無變化 (可能是休市或無交易)")
+        # 即使沒變化，也傳送一條簡單的訊息確認運作正常
+        no_change_msg = f"📊 **00981A 監控日報** ({datetime.now().strftime('%m/%d')})\n✅ 本日持股無異動。\n💰 現金水位: `{current_cash:.2f}%`"
+        print("今日無變化，發送平安報。")
+        send_telegram_message(no_change_msg)
 
     # 存檔
     new_df.to_csv(DATA_FILE, index=False)
@@ -187,3 +190,4 @@ def compare_and_report():
 
 if __name__ == "__main__":
     compare_and_report()
+
