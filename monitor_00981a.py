@@ -173,16 +173,21 @@ def compare_and_report():
         for _, msg in share_changes:
             report_lines.append(msg)
 
-    # 發送通知
+# 發送通知
     if has_change:
         final_msg = "\n".join(report_lines)
         print(final_msg)
         send_telegram_message(final_msg)
     else:
-        # 即使沒變化，也傳送一條簡單的訊息確認運作正常
-        no_change_msg = f"📊 **00981A 監控日報** ({datetime.now().strftime('%m/%d')})\n✅ 本日持股無異動。\n💰 現金水位: `{current_cash:.2f}%`"
+        # --- 修改這裡：即使沒變化，也強制發送訊息 ---
         print("今日無變化，發送平安報。")
-        send_telegram_message(no_change_msg)
+        
+        # 顯示現金水位 (若有抓到的話)
+        status_msg = f"✅ **00981A 監控運作中**\n📅 {datetime.now().strftime('%Y-%m-%d %H:%M')}\n📉 本日持股無異動"
+        if 'current_cash' in locals() and current_cash:
+             status_msg += f"\n💰 現金水位: `{current_cash:.2f}%`"
+             
+        send_telegram_message(status_msg)
 
     # 存檔
     new_df.to_csv(DATA_FILE, index=False)
@@ -190,4 +195,5 @@ def compare_and_report():
 
 if __name__ == "__main__":
     compare_and_report()
+
 
