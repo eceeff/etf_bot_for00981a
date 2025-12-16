@@ -2,7 +2,7 @@ name: Daily 00981A Tracker
 
 on:
   schedule:
-    - cron: '0 12 * * 1-5' # 台灣時間晚上 8 點 (UTC 12:00)
+    - cron: '0 13 * * *' # 台灣時間晚上 8 點 (UTC 12:00)
   workflow_dispatch:
 
 permissions:
